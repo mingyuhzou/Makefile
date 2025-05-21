@@ -1,0 +1,4 @@
+/mnt/e/Makefile/myProject/build/CMakeFiles/Mylib.dir
+/mnt/e/Makefile/myProject/build/CMakeFiles/main.dir
+/mnt/e/Makefile/myProject/build/CMakeFiles/edit_cache.dir
+/mnt/e/Makefile/myProject/build/CMakeFiles/rebuild_cache.dir

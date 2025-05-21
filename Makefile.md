@@ -297,3 +297,185 @@ clean:
 
 ```
 
+
+
+
+
+
+
+# CMake
+
+CMake是一种自动生成makefile构建文件的工具，支持跨平台运行。
+
+![img](./assets/Single_Source_Build-cmake.png)
+
+```shell
+sudo apt-get install cmake # linux安装命令
+```
+
+
+
+CMakeLists.,txt是CMkake的配置文件，用于定义项目的构建规则，依赖关系，编译选项等，每个CMake项目通常都有**一个或多个**CMakeLists.txt文件，文件由一系列CMake指令描述。
+
+
+
+CMake推荐使用Out-of-Source构建方式，即将构建文件放在源代码目录之外的独立目录中(build)
+
+项目目录如下
+
+```python
+MyProject/
+├── CMakeLists.txt
+├── build
+├── src/
+│   ├── main.cpp
+│   └── mylib.cpp
+└── include/
+    └── mylib.h
+```
+
+
+
+## 基础语法
+
+```cmake
+cmake_minimum_required(VERSION 3.10)
+```
+
+指定CMake的最低版本要求
+
+
+
+```cmake
+project(MyGame VERSION 1.0 LANGUAGES C CXX)
+```
+
+声明项目的信息，如名称，版号，使用的语言(CXX指C++)，可以仅指定名称
+
+
+
+```cmake
+add_executable(MyExecutable main.cpp other_file.cpp)
+```
+
+指定要生成的可执行文件和其源文件
+
+
+
+```cmake
+add_library(MyLibrary STATIC library.cpp)
+```
+
+创建一个库（静态库或动态库）及其源文件
+
+
+
+```cmake
+target_include_directories(Mylib PUBLIC ${PROJECT_SOURCE_DIR}/include)
+```
+
+指定头文件路径，要放在add_library下面并且指定PUBLIC，这样可以让链接到Mylib的目标也获得头文件路径
+
+
+
+```cmake
+target_link_libraries(MyExecutable MyLibrary)
+```
+
+链接目标文件与其他库
+
+
+
+```cmake
+set(<variable> <value>...)
+set(CMAKE_CXX_STANDARD 11) # 设置C++版本
+```
+
+设置变量的值
+
+
+
+```python
+if(expression)
+  # Commands
+elseif(expression)
+  # Commands
+else()
+  # Commands
+endif()
+```
+
+条件分支
+
+
+
+| 变量                 | 描述                     |
+| -------------------- | ------------------------ |
+| `CMAKE_SOURCE_DIR`   | 整个工程的顶层源码目录   |
+| `PROJECT_SOURCE_DIR` | 当前CMakeLists所在的目录 |
+
+
+
+以下述项目为例
+
+```python
+MyProject/
+├── CMakeLists.txt           ← 顶层 CMake 文件
+├── src/
+│   ├── main.cpp             ← 主函数（含 main）
+│   ├── lib/
+│   │   ├── module1.cpp      ← 模块源码
+│   │   ├── module2.cpp
+│   ├── include/
+│       └── mylib.h          ← 所有头文件集中于此
+```
+
+
+
+这里按照分模块编写
+
+MyProject/CMakeLists.txt
+
+```cmake
+cmake_minimum_required(VERSION 3.10)
+project(MyProject VERSION 1.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # 编译器必须支持指定版本的C++，不许用旧的标准，否则就报错
+
+# 添加子目录：src/lib，分模块编写
+add_subdirectory(src/lib)
+
+# 添加可执行程序
+add_executable(MyApp src/main.cpp)
+
+# 链接库，PRIVATE显式地指定mylib只作用于MyApp(默认也是private)
+target_link_libraries(MyApp PRIVATE mylib) 
+```
+
+
+
+src/lib/CMakeLists.txt
+
+```cmake
+# 构建库（.cpp 源文件）
+add_library(mylib
+    module1.cpp
+    module2.cpp
+)
+
+# 指定头文件目录（给库和使用库的人）
+target_include_directories(mylib PUBLIC ${PROJECT_SOURCE_DIR}/src/include)
+```
+
+
+
+然后运行
+
+```shell
+mkdir build
+cd build
+cmake ..
+make
+```
+
